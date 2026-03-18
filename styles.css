@@ -107,3 +107,19 @@ footer{border-top:1px solid #e8ddd3;padding:20px;color:#5b6771}
 .footer-inner{max-width:1220px;margin:0 auto;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
 @media (max-width:980px){.hero-inner,.home-screen,.game-grid{grid-template-columns:1fr}.hero h1{font-size:40px}.hero-stats{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:680px){.hero{padding:28px 16px 24px}.page{padding:18px 14px 28px}.hero h1{font-size:34px}.mini-grid,.choice-grid.two,.choice-grid.three,.mode-grid{grid-template-columns:1fr}.hero-stats{grid-template-columns:1fr}.prescription-panel h2{font-size:28px}.draw-readout,.footer-inner{flex-direction:column;align-items:flex-start}}
+
+
+/* V7 body diagram patch */
+.site-diagram{display:grid;gap:12px;margin-top:12px}
+.body-diagram-wrap{display:grid;gap:14px}
+.body-card{border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,#ffffff,#fff8f4);padding:14px;box-shadow:var(--shadow-sm)}
+.body-card-title{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:#718096}
+.body-svg{width:100%;max-width:250px;height:auto;display:block;margin:0 auto}
+.site-legend{display:grid;gap:8px}
+.site-legend-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;border:1px solid var(--line);background:#fff}
+.site-dot{width:12px;height:12px;border-radius:50%;flex:0 0 12px}
+.site-dot.im{background:#f4c542}
+.site-dot.sq{background:#f26c4f}
+.site-dot.id{background:#7c94c7}
+.site-legend strong{font-size:14px}
+.site-legend span{color:var(--muted);font-size:13px}

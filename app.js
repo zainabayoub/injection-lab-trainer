@@ -11,6 +11,90 @@ function startMode(mode){state.mode=mode;state.index=0;state.score=0;state.selec
 function goHome(){showScreen("home");clearFeedback()}
 function showScreen(screen){homeScreen.classList.add("hidden");gameScreen.classList.add("hidden");resultsScreen.classList.add("hidden");if(screen==="home")homeScreen.classList.remove("hidden");if(screen==="game")gameScreen.classList.remove("hidden");if(screen==="results")resultsScreen.classList.remove("hidden")}
 function render(){const scenario=scenarios[state.index],guide=routeGuides[scenario.route],syringe=syringeLibrary.find(s=>s.id===scenario.syringeType);currentModeEl.textContent=modeLabels[state.mode];progressTextEl.textContent=`${state.index+1} / ${scenarios.length}`;scoreTextEl.textContent=state.score;progressFillEl.style.width=`${state.index/scenarios.length*100}%`;orderTextEl.textContent=scenario.order;medicationTextEl.textContent=scenario.medication;strengthTextEl.textContent=scenario.strength;bestSyringeTextEl.textContent=syringeDisplayName(syringe.id);routePillEl.textContent=scenario.route;siteFamilyTextEl.textContent=`${scenario.route} Site Family`;routeCueTextEl.textContent=guide.cue;angleTextEl.textContent=guide.angle;lengthTextEl.textContent=guide.length;siteMapTextEl.textContent=guide.siteMap;siteDiagramEl.innerHTML=guide.sites.map(site=>`<div class="site-chip"><div><div class="site-name">${site.name}</div><div class="site-meta">${site.meta}</div></div><div class="soft-label">${scenario.route}</div></div>`).join("");clearFeedback();state.selectedSyringe=null;state.selectedGauge=null;renderModePanel(scenario,syringe,guide)}
+
+function renderBodyDiagram(route){
+  if(route==="IM"){
+    return `<div class="body-diagram-wrap">
+      <div class="body-card">
+        <div class="body-card-title">Front View</div>
+        ${frontBodySVG([{x:126,y:66,cls:"im"},{x:92,y:145,cls:"im"},{x:160,y:145,cls:"im"}])}
+      </div>
+      <div class="site-legend">
+        <div class="site-legend-item"><span class="site-dot im"></span><div><strong>Deltoid</strong><br><span>Upper arm muscle</span></div></div>
+        <div class="site-legend-item"><span class="site-dot im"></span><div><strong>Vastus Lateralis</strong><br><span>Outer thigh muscle</span></div></div>
+        <div class="site-legend-item"><span class="site-dot im"></span><div><strong>Ventrogluteal</strong><br><span>Hip area</span></div></div>
+      </div>
+    </div>`;
+  }
+  if(route==="SQ"){
+    return `<div class="body-diagram-wrap">
+      <div class="body-card">
+        <div class="body-card-title">Front View</div>
+        ${frontBodySVG([{x:88,y:92,cls:"sq"},{x:126,y:112,cls:"sq"},{x:160,y:145,cls:"sq"}])}
+      </div>
+      <div class="site-legend">
+        <div class="site-legend-item"><span class="site-dot sq"></span><div><strong>Back of Upper Arm</strong><br><span>Fat tissue area</span></div></div>
+        <div class="site-legend-item"><span class="site-dot sq"></span><div><strong>Lower Abdomen</strong><br><span>2 inches from navel</span></div></div>
+        <div class="site-legend-item"><span class="site-dot sq"></span><div><strong>Top of Thigh</strong><br><span>Fat tissue area</span></div></div>
+      </div>
+    </div>`;
+  }
+  return `<div class="body-diagram-wrap">
+    <div class="body-card">
+      <div class="body-card-title">Common Test Sites</div>
+      ${dualBodySVG()}
+    </div>
+    <div class="site-legend">
+      <div class="site-legend-item"><span class="site-dot id"></span><div><strong>Forearm</strong><br><span>Most common for PPD</span></div></div>
+      <div class="site-legend-item"><span class="site-dot id"></span><div><strong>Upper Chest</strong><br><span>Skin testing site</span></div></div>
+      <div class="site-legend-item"><span class="site-dot id"></span><div><strong>Upper Back</strong><br><span>Between shoulder blades</span></div></div>
+    </div>
+  </div>`;
+}
+
+function frontBodySVG(markers){
+  const dots = markers.map(m=>`<circle cx="${m.x}" cy="${m.y}" r="6.5" fill="${m.cls==="im"?"#f4c542":"#f26c4f"}" stroke="#fff" stroke-width="2"/>`).join("");
+  return `<svg class="body-svg" viewBox="0 0 250 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs><linearGradient id="skinGradFront" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#f7dfcf"/><stop offset="100%" stop-color="#efc9b6"/></linearGradient></defs>
+    <circle cx="125" cy="36" r="20" fill="url(#skinGradFront)" stroke="#d9b29d" stroke-width="2"/>
+    <rect x="108" y="55" width="34" height="24" rx="12" fill="url(#skinGradFront)" stroke="#d9b29d" stroke-width="2"/>
+    <rect x="90" y="76" width="70" height="74" rx="26" fill="url(#skinGradFront)" stroke="#d9b29d" stroke-width="2"/>
+    <rect x="66" y="82" width="22" height="70" rx="11" fill="url(#skinGradFront)" stroke="#d9b29d" stroke-width="2"/>
+    <rect x="162" y="82" width="22" height="70" rx="11" fill="url(#skinGradFront)" stroke="#d9b29d" stroke-width="2"/>
+    <rect x="100" y="148" width="20" height="82" rx="10" fill="url(#skinGradFront)" stroke="#d9b29d" stroke-width="2"/>
+    <rect x="130" y="148" width="20" height="82" rx="10" fill="url(#skinGradFront)" stroke="#d9b29d" stroke-width="2"/>
+    ${dots}
+  </svg>`;
+}
+
+function dualBodySVG(){
+  return `<svg class="body-svg" viewBox="0 0 320 250" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs><linearGradient id="skinGradDual" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#f7dfcf"/><stop offset="100%" stop-color="#efc9b6"/></linearGradient></defs>
+    <g transform="translate(20,0)">
+      <circle cx="70" cy="36" r="18" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
+      <rect x="55" y="54" width="30" height="22" rx="11" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
+      <rect x="38" y="74" width="64" height="70" rx="24" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
+      <rect x="18" y="82" width="18" height="66" rx="9" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
+      <rect x="104" y="82" width="18" height="66" rx="9" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
+      <rect x="48" y="142" width="18" height="76" rx="9" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
+      <rect x="74" y="142" width="18" height="76" rx="9" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
+      <circle cx="36" cy="118" r="6.5" fill="#7c94c7" stroke="#fff" stroke-width="2"/>
+      <circle cx="70" cy="96" r="6.5" fill="#7c94c7" stroke="#fff" stroke-width="2"/>
+    </g>
+    <g transform="translate(170,0)">
+      <circle cx="70" cy="36" r="18" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
+      <rect x="55" y="54" width="30" height="22" rx="11" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
+      <rect x="38" y="74" width="64" height="70" rx="24" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
+      <rect x="18" y="82" width="18" height="66" rx="9" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
+      <rect x="104" y="82" width="18" height="66" rx="9" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
+      <rect x="48" y="142" width="18" height="76" rx="9" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
+      <rect x="74" y="142" width="18" height="76" rx="9" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
+      <circle cx="70" cy="92" r="6.5" fill="#7c94c7" stroke="#fff" stroke-width="2"/>
+    </g>
+  </svg>`;
+}
+
+
 function renderModePanel(scenario,syringe,guide){
 if(state.mode==="tray"){const shuffledSyringes=shuffleArray(syringeLibrary),shuffledVials=shuffleArray(scenario.vials),shuffledGauges=shuffleArray(gaugeLibrary);modePanelEl.innerHTML=`<h3 class="section-title">Step 1 • Choose the correct syringe</h3><div class="choice-grid three">${shuffledSyringes.map(item=>syringeCard(item)).join("")}</div><h3 class="section-title" style="margin-top:18px;">Step 2 • Choose the correct needle gauge</h3><div class="choice-grid two">${shuffledGauges.map(item=>`<button class="choice-btn gauge-option" data-gauge-id="${item.id}"><span class="choice-title">${item.label}</span><span class="choice-sub">${item.subtitle}</span></button>`).join("")}</div><h3 class="section-title" style="margin-top:18px;">Step 3 • Choose the correct vial</h3><div class="choice-grid two">${shuffledVials.map(v=>vialCard(v,getVialColor(v))).join("")}</div>`;bindSyringeChoices(scenario);bindGaugeChoices(scenario);bindVialChoices(scenario);return}
 if(state.mode==="calc"){modePanelEl.innerHTML=`<h3 class="section-title">Dose Challenge</h3><div class="mini-card" style="margin-bottom:14px;"><div class="route-icon ${scenario.route.toLowerCase()}">${guide.icon}</div><span class="mini-title">Prompt</span><p>Calculate the correct amount to draw for this order.</p></div><div class="slider-wrap"><label for="doseInput"><strong>Enter the correct amount</strong></label><input id="doseInput" type="text" placeholder="Example: 0.6 mL or 10 units" /><div class="draw-readout"><span>Use the vial strength shown on the prescription.</span><button id="submitDoseBtn" class="inline-btn">Check Answer</button></div></div>`;document.getElementById("submitDoseBtn").addEventListener("click",()=>{const val=document.getElementById("doseInput").value.trim().toLowerCase();if(!val)return showBad("Enter an answer first.","Add the exact amount to draw before checking.");if(normalizeDose(val)===normalizeDose(scenario.correctDose)){correctAdvance("Correct dose.",`${scenario.correctDose} is the correct amount for this prescription. ${scenario.explainCorrect}`)}else{showBad(`Not quite. Correct answer: ${scenario.correctDose}`,`Recheck the vial strength and ordered dose. ${scenario.explainCorrect}`)}});return}
