@@ -123,3 +123,36 @@ footer{border-top:1px solid #e8ddd3;padding:20px;color:#5b6771}
 .site-dot.id{background:#7c94c7}
 .site-legend strong{font-size:14px}
 .site-legend span{color:var(--muted);font-size:13px}
+
+
+/* V8 UX + tray polish patch */
+.cue-panel{
+  background:linear-gradient(135deg, rgba(124,148,199,.28), rgba(246,183,168,.30)) !important;
+}
+.mini-card{
+  background:linear-gradient(180deg,#ffffff 0%, #fff4ef 100%);
+}
+.interaction-panel.tray-mode{
+  background:linear-gradient(180deg,#cfd4d8 0%, #b9c0c5 45%, #d7dde1 100%);
+  border:1px solid #aeb7bd;
+  box-shadow:inset 0 2px 10px rgba(255,255,255,.45), inset 0 -6px 14px rgba(79,90,100,.10), var(--shadow);
+}
+.interaction-panel.tray-mode .choice-btn{
+  background:linear-gradient(180deg,#fbfbfb 0%, #eef2f4 100%);
+  border:1px solid #b8c1c8;
+}
+.interaction-panel.tray-mode .section-title{
+  color:#566575;
+}
+.feedback-actions{
+  margin-top:10px;
+}
+.next-btn{
+  border:none;
+  border-radius:14px;
+  padding:10px 14px;
+  font-weight:800;
+  cursor:pointer;
+  background:linear-gradient(135deg,var(--mimosa), #efb72b);
+  color:#4a3601;
+}
