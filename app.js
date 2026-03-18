@@ -37,10 +37,10 @@ function render(){
 
   const gameGrid=document.querySelector(".game-grid");
   if(gameGrid){
-    gameGrid.classList.toggle("tray-layout", state.mode==="tray");
+    gameGrid.className = state.mode==="tray" ? "game-grid tray-layout" : "game-grid";
   }
   if(feedbackBoxEl){
-    feedbackBoxEl.classList.toggle("tray-feedback", state.mode==="tray");
+    feedbackBoxEl.className = state.mode==="tray" ? "feedback-box tray-feedback" : "feedback-box";
   }
 
   if(bestSyringeTextEl && bestSyringeTextEl.parentElement){
@@ -50,7 +50,7 @@ function render(){
     siteMapTextEl.parentElement.style.display = state.mode==="sites" ? "none" : "block";
   }
   if(siteDiagramEl && siteDiagramEl.parentElement){
-    siteDiagramEl.parentElement.style.display = state.mode==="sites" ? "none" : "block";
+    siteDiagramEl.parentElement.style.display = state.mode==="tray" || state.mode==="sites" ? "none" : "block";
   }
 
   if(state.mode==="sites"){
