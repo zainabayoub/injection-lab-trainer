@@ -248,11 +248,7 @@ function syringeCard(item){
   return `
     <button class="choice-btn syringe-option" data-syringe-id="${item.id}">
       <div class="syringe-graphic">
-        <div class="needle"></div>
-        <div class="barrel ${item.barrel}">
-          <div class="marker-row">| | | | | |</div>
-        </div>
-        <div class="plunger"></div>
+        ${renderSyringeSVG(item)}
       </div>
       <span class="choice-title">${item.name}</span>
       <span class="choice-sub">${item.subtitle}</span>
@@ -260,16 +256,77 @@ function syringeCard(item){
   `;
 }
 
+function renderSyringeSVG(item){
+  const barrelWidth = item.id === "insulin" ? 112 : item.id === "tuberculin" ? 148 : 192;
+  const lineCount = item.id === "insulin" ? 7 : item.id === "tuberculin" ? 8 : 9;
+  const lineSpacing = barrelWidth / (lineCount + 1);
+  let marks = "";
+  for(let i = 1; i <= lineCount; i++){
+    const x = 40 + i * lineSpacing;
+    marks += `<line x1="${x}" y1="28" x2="${x}" y2="48" stroke="#b8c8d3" stroke-width="2"/>`;
+  }
+  const needleColor = item.id === "insulin" ? "#f3a451" : "#8aa0ad";
+  return `
+    <svg class="syringe-svg" viewBox="0 0 260 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="barrelGrad-${item.id}" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="100%" stop-color="#edf2f5"/>
+        </linearGradient>
+        <linearGradient id="plungerGrad-${item.id}" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#d6dee3"/>
+          <stop offset="100%" stop-color="#b8c6cf"/>
+        </linearGradient>
+      </defs>
+
+      <line x1="10" y1="38" x2="28" y2="38" stroke="${needleColor}" stroke-width="3" stroke-linecap="round"/>
+      <line x1="28" y1="38" x2="40" y2="38" stroke="#93a9b5" stroke-width="4" stroke-linecap="round"/>
+
+      <rect x="40" y="24" rx="9" ry="9" width="${barrelWidth}" height="28" fill="url(#barrelGrad-${item.id})" stroke="#8da0ac" stroke-width="2.4"/>
+      ${marks}
+      <rect x="${40 + barrelWidth}" y="17" width="22" height="42" rx="8" fill="url(#plungerGrad-${item.id})" stroke="#80939f" stroke-width="2.2"/>
+      <rect x="${30 + barrelWidth}" y="20" width="12" height="36" rx="5" fill="#edf2f5" stroke="#b8c6cf" stroke-width="1.4"/>
+
+      ${item.id === "insulin" ? '<circle cx="18" cy="38" r="4" fill="#f3a451"/>' : ''}
+    </svg>
+  `;
+}
+
 function vialCard(name, color){
   return `
     <button class="choice-btn vial-btn vial-option" data-vial-name="${escapeHtml(name)}">
-      <div class="vial-top"></div>
       <div class="vial-graphic">
-        <div class="vial-liquid" style="background:${color};"></div>
+        ${renderVialSVG(color, name)}
       </div>
       <span class="choice-title">${name}</span>
       <span class="choice-sub">Select this vial</span>
     </button>
+  `;
+}
+
+function renderVialSVG(color, name){
+  return `
+    <svg class="vial-svg" viewBox="0 0 110 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="glassGrad-${safeId(name)}" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="100%" stop-color="#eef3f6"/>
+        </linearGradient>
+        <linearGradient id="capGrad-${safeId(name)}" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#cfd7dc"/>
+          <stop offset="100%" stop-color="#adb9c0"/>
+        </linearGradient>
+      </defs>
+
+      <rect x="27" y="12" width="56" height="22" rx="10" fill="url(#capGrad-${safeId(name)})" stroke="#b8c3ca" stroke-width="1.5"/>
+      <rect x="16" y="28" width="78" height="102" rx="28" fill="url(#glassGrad-${safeId(name)})" stroke="#c5d0d5" stroke-width="4"/>
+
+      <rect x="35" y="56" width="40" height="48" rx="10" fill="${color}" opacity="0.95"/>
+      <rect x="43" y="64" width="9" height="32" rx="5" fill="rgba(255,255,255,.20)"/>
+
+      <rect x="28" y="108" width="54" height="12" rx="6" fill="#ffffff" opacity="0.92" stroke="#d8dfe4" stroke-width="1"/>
+      <rect x="33" y="112" width="44" height="4" rx="2" fill="#e8edf1"/>
+    </svg>
   `;
 }
 
@@ -379,6 +436,10 @@ function shuffleArray(arr){
 function getVialColor(name){
   const match = scenarios.find(s => s.medication === name);
   return match ? match.vialColor : "#d8e2e8";
+}
+
+function safeId(str){
+  return str.toLowerCase().replace(/[^a-z0-9]+/g,'-');
 }
 
 function escapeHtml(s){

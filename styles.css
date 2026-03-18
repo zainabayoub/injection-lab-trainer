@@ -268,50 +268,48 @@ button{font:inherit}
   border-color:#bfd03e;
 }
 .choice-btn.selected-wrong{
-  background:linear-gradient(180deg,#ffe9e3 0%, #ffd8cf 100%);
+  background:linear-gradient(180deg,#fff0eb 0%, #ffd9ce 100%);
   border-color:#f4a18f;
 }
 .choice-title{font-weight:800}
 .choice-sub{display:block;color:var(--muted);font-size:13px;line-height:1.6;margin-top:6px}
 
+/* UPDATED REALISTIC ART */
 .vial-btn{position:relative;overflow:hidden}
 .vial-graphic{
-  width:78px;height:108px;margin:0 auto 10px;
-  border-radius:28px;
-  background:linear-gradient(180deg,#ffffff,#f5f5f5);
-  border:4px solid #d8e1e3;
-  display:flex;align-items:flex-end;justify-content:center;
-  box-shadow: inset 0 0 14px rgba(0,0,0,.04);
+  width:96px;
+  height:124px;
+  margin:2px auto 12px;
+  display:block;
 }
-.vial-liquid{
-  width:44px;height:68px;border-radius:10px 10px 18px 18px;border:1px solid #d4dbe0;
-  position:relative;
+.vial-svg{
+  width:100%;
+  height:100%;
+  display:block;
 }
-.vial-liquid::after{
-  content:"";
-  position:absolute;
-  inset:8px auto auto 6px;
-  width:12px;
-  height:42px;
-  border-radius:999px;
-  background:rgba(255,255,255,.18);
+.syringe-graphic{
+  width:100%;
+  max-width:230px;
+  height:88px;
+  margin:0 auto 12px;
+  display:block;
 }
-.vial-top{
-  position:absolute;top:18px;left:50%;transform:translateX(-50%);
-  width:56px;height:16px;border-radius:999px;background:#cfd7dc;border:1px solid #bcc8ce;
+.syringe-svg{
+  width:100%;
+  height:100%;
+  display:block;
 }
-.syringe-graphic{height:84px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
-.barrel{
-  height:18px;background:#fff;border:2px solid #8997a1;border-radius:0 999px 999px 0;position:relative;
+.glass-shine{opacity:.28}
+.med-label{
+  margin-top:2px;
+  display:inline-block;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#73808c;
 }
-.barrel.short{width:98px}
-.barrel.medium{width:146px}
-.barrel.long{width:196px}
-.plunger{width:24px;height:34px;background:#cfd7dc;border:2px solid #7b8a94;border-radius:0 10px 10px 0}
-.needle{width:20px;height:4px;background:#9fb2bc;border-radius:999px;margin-right:6px}
-.marker-row{
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:space-evenly;color:#cad5da;font-size:10px;font-weight:900;
-}
+
 .route-icon{
   width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
   font-size:20px;font-weight:900;margin-bottom:10px;
