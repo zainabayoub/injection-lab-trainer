@@ -115,8 +115,7 @@ button{font:inherit}
 }
 .mode-card{
   border:none;
-  background:
-    linear-gradient(180deg,#ffffff 0%, #fff9f1 100%);
+  background:linear-gradient(180deg,#ffffff 0%, #fff9f1 100%);
   border:1px solid var(--line);
   border-radius:26px;
   padding:20px;
@@ -273,12 +272,12 @@ button{font:inherit}
 }
 .choice-title{font-weight:800}
 .choice-sub{display:block;color:var(--muted);font-size:13px;line-height:1.6;margin-top:6px}
+.choice-micro{display:block;color:#7a8694;font-size:12px;line-height:1.45;margin-top:6px}
 
-/* UPDATED REALISTIC ART */
 .vial-btn{position:relative;overflow:hidden}
 .vial-graphic{
-  width:96px;
-  height:124px;
+  width:100px;
+  height:130px;
   margin:2px auto 12px;
   display:block;
 }
@@ -289,8 +288,8 @@ button{font:inherit}
 }
 .syringe-graphic{
   width:100%;
-  max-width:230px;
-  height:88px;
+  max-width:240px;
+  height:90px;
   margin:0 auto 12px;
   display:block;
 }
@@ -298,16 +297,6 @@ button{font:inherit}
   width:100%;
   height:100%;
   display:block;
-}
-.glass-shine{opacity:.28}
-.med-label{
-  margin-top:2px;
-  display:inline-block;
-  font-size:11px;
-  font-weight:800;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  color:#73808c;
 }
 
 .route-icon{
