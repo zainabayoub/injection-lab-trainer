@@ -1,5 +1,5 @@
 
-const homeScreen=document.getElementById("homeScreen"),gameScreen=document.getElementById("gameScreen"),resultsScreen=document.getElementById("resultsScreen"),currentModeEl=document.getElementById("currentMode"),progressTextEl=document.getElementById("progressText"),scoreTextEl=document.getElementById("scoreText"),progressFillEl=document.getElementById("progressFill"),orderTextEl=document.getElementById("orderText"),medicationTextEl=document.getElementById("medicationText"),strengthTextEl=document.getElementById("strengthText"),bestSyringeTextEl=document.getElementById("bestSyringeText"),routePillEl=document.getElementById("routePill"),routeCueTextEl=document.getElementById("routeCueText"),angleTextEl=document.getElementById("angleText"),lengthTextEl=document.getElementById("lengthText"),siteMapTextEl=document.getElementById("siteMapText"),siteFamilyTextEl=document.getElementById("siteFamilyText"),siteDiagramEl=document.getElementById("siteDiagram"),modePanelEl=document.getElementById("modePanel"),feedbackBoxEl=document.getElementById("feedbackBox"),resultsTitleEl=document.getElementById("resultsTitle"),resultsBodyEl=document.getElementById("resultsBody");
+const homeScreen=document.getElementById("homeScreen"),gameScreen=document.getElementById("gameScreen"),resultsScreen=document.getElementById("resultsScreen"),currentModeEl=document.getElementById("currentMode"),progressTextEl=document.getElementById("progressText"),scoreTextEl=document.getElementById("scoreText"),progressFillEl=document.getElementById("progressFill"),orderTextEl=document.getElementById("orderText"),medicationTextEl=document.getElementById("medicationText"),strengthTextEl=document.getElementById("strengthText"),bestSyringeTextEl=document.getElementById("bestSyringeText"),bestSyringeRowEl=document.getElementById("bestSyringeRow"),routePillEl=document.getElementById("routePill"),routeCueTextEl=document.getElementById("routeCueText"),angleTextEl=document.getElementById("angleText"),lengthTextEl=document.getElementById("lengthText"),siteMapTextEl=document.getElementById("siteMapText"),siteFamilyTextEl=document.getElementById("siteFamilyText"),siteDiagramEl=document.getElementById("siteDiagram"),modePanelEl=document.getElementById("modePanel"),feedbackBoxEl=document.getElementById("feedbackBox"),resultsTitleEl=document.getElementById("resultsTitle"),resultsBodyEl=document.getElementById("resultsBody");
 const gaugeLibrary=[{id:"im",label:"21G–23G",subtitle:"Needle gauge option"},{id:"sq",label:"25G–31G",subtitle:"Needle gauge option"},{id:"id",label:"25G–27G",subtitle:"Needle gauge option"},{id:"wide",label:"18G–20G",subtitle:"Needle gauge option"}];
 const state={mode:"tray",index:0,score:0,selectedSyringe:null,selectedGauge:null,questionSet:[],readyForNext:false};
 const modeLabels={tray:"Medication Tray",calc:"Dose Challenge",sites:"Injection Sites",safety:"Safety Check"};
@@ -8,9 +8,9 @@ document.getElementById("backHomeBtn").addEventListener("click",goHome);
 document.getElementById("resultsHomeBtn").addEventListener("click",goHome);
 document.getElementById("playAgainBtn").addEventListener("click",()=>startMode(state.mode));
 function startMode(mode){state.mode=mode;state.index=0;state.score=0;state.selectedSyringe=null;state.selectedGauge=null;state.readyForNext=false;state.questionSet=shuffleArray(scenarios);showScreen("game");render()}
-function goHome(){document.querySelector(".game-grid")?.classList.remove("tray-layout");feedbackBoxEl.classList.remove("tray-feedback");showScreen("home");clearFeedback()}
+function goHome(){showScreen("home");clearFeedback()}
 function showScreen(screen){homeScreen.classList.add("hidden");gameScreen.classList.add("hidden");resultsScreen.classList.add("hidden");if(screen==="home")homeScreen.classList.remove("hidden");if(screen==="game")gameScreen.classList.remove("hidden");if(screen==="results")resultsScreen.classList.remove("hidden")}
-function render(){const scenario=state.questionSet[state.index]||scenarios[state.index],guide=routeGuides[scenario.route],syringe=syringeLibrary.find(s=>s.id===scenario.syringeType),gameGridEl=document.querySelector(".game-grid"),isTrayMode=state.mode==="tray";gameGridEl.classList.toggle("tray-layout",isTrayMode);feedbackBoxEl.classList.toggle("tray-feedback",isTrayMode);currentModeEl.textContent=modeLabels[state.mode];progressTextEl.textContent=`${state.index+1} / ${state.questionSet.length||scenarios.length}`;scoreTextEl.textContent=state.score;progressFillEl.style.width=`${state.index/(state.questionSet.length||scenarios.length)*100}%`;orderTextEl.textContent=scenario.order;medicationTextEl.textContent=scenario.medication;strengthTextEl.textContent=scenario.strength;bestSyringeTextEl.textContent=syringeDisplayName(syringe.id);routePillEl.textContent=scenario.route;siteFamilyTextEl.textContent=`${scenario.route} Site Family`;routeCueTextEl.textContent=guide.cue;angleTextEl.textContent=guide.angle;lengthTextEl.textContent=guide.length;siteMapTextEl.textContent=guide.siteMap;siteDiagramEl.innerHTML=guide.sites.map(site=>`<div class="site-chip"><div><div class="site-name">${site.name}</div><div class="site-meta">${site.meta}</div></div><div class="soft-label">${scenario.route}</div></div>`).join("");clearFeedback();state.selectedSyringe=null;state.selectedGauge=null;state.readyForNext=false;renderModePanel(scenario,syringe,guide)}
+function render(){const scenario=state.questionSet[state.index]||scenarios[state.index],guide=routeGuides[scenario.route],syringe=syringeLibrary.find(s=>s.id===scenario.syringeType),total=state.questionSet.length||scenarios.length;currentModeEl.textContent=modeLabels[state.mode];progressTextEl.textContent=`${state.index+1} / ${total}`;scoreTextEl.textContent=state.score;progressFillEl.style.width=`${((state.index+1)/total)*100}%`;orderTextEl.textContent=scenario.order;medicationTextEl.textContent=scenario.medication;strengthTextEl.textContent=scenario.strength;bestSyringeTextEl.textContent=syringeDisplayName(syringe.id);if(bestSyringeRowEl)bestSyringeRowEl.style.display=state.mode==="tray"?"none":"";routePillEl.textContent=scenario.route;siteFamilyTextEl.textContent=`${scenario.route} Site Family`;routeCueTextEl.textContent=guide.cue;angleTextEl.textContent=guide.angle;lengthTextEl.textContent=guide.length;siteMapTextEl.textContent=guide.siteMap;siteDiagramEl.innerHTML=guide.sites.map(site=>`<div class="site-chip"><div><div class="site-name">${site.name}</div><div class="site-meta">${site.meta}</div></div><div class="soft-label">${scenario.route}</div></div>`).join("");clearFeedback();state.selectedSyringe=null;state.selectedGauge=null;state.readyForNext=false;renderModePanel(scenario,syringe,guide)}
 
 function renderBodyDiagram(route){
   if(route==="IM"){
@@ -95,66 +95,10 @@ function dualBodySVG(){
 }
 
 
-
-function buildSiteChoices(route){
-  const correctPool = routeGuides[route].sites.map(s => ({label:s.name, route, summary:s.meta, correct:true}));
-  const correctChoice = shuffleArray(correctPool)[0];
-  const distractors = [];
-  Object.entries(routeGuides).forEach(([r,g]) => {
-    if(r !== route){
-      g.sites.forEach(s => distractors.push({label:s.name, route:r, summary:s.meta, correct:false}));
-    }
-  });
-  const pickedDistractors = shuffleArray(distractors).slice(0,3);
-  return shuffleArray([correctChoice, ...pickedDistractors]);
-}
-
 function renderModePanel(scenario,syringe,guide){
-if(state.mode==="tray"){
-    modePanelEl.className="panel interaction-panel tray-mode";
-    const shuffledSyringes=shuffleArray(syringeLibrary),shuffledVials=shuffleArray(scenario.vials),shuffledGauges=shuffleArray(gaugeLibrary);
-    modePanelEl.innerHTML=`
-      <div class="tray-board">
-        <div class="tray-section">
-          <div class="tray-step">Step 1 • Syringe</div>
-          <div class="tray-options compact-three">
-            ${shuffledSyringes.map(item=>syringeCard(item)).join("")}
-          </div>
-        </div>
-        <div class="tray-section">
-          <div class="tray-step">Step 2 • Needle Gauge</div>
-          <div class="tray-options compact-two">
-            ${shuffledGauges.map(item=>`<button class="choice-btn gauge-option" data-gauge-id="${item.id}"><span class="choice-title">${item.label}</span></button>`).join("")}
-          </div>
-        </div>
-        <div class="tray-section">
-          <div class="tray-step">Step 3 • Vial</div>
-          <div class="tray-options compact-two">
-            ${shuffledVials.map(v=>vialCard(v,getVialColor(v))).join("")}
-          </div>
-        </div>
-      </div>`;
-    bindSyringeChoices(scenario);
-    bindGaugeChoices(scenario);
-    bindVialChoices(scenario);
-    return
-  }
+if(state.mode==="tray"){modePanelEl.className="panel interaction-panel tray-mode";const shuffledSyringes=shuffleArray(syringeLibrary),shuffledVials=shuffleArray(scenario.vials),shuffledGauges=shuffleArray(gaugeLibrary);modePanelEl.innerHTML=`<h3 class="section-title">Step 1 • Choose the correct syringe</h3><div class="choice-grid three">${shuffledSyringes.map(item=>syringeCard(item)).join("")}</div><h3 class="section-title" style="margin-top:18px;">Step 2 • Choose the correct needle gauge</h3><div class="choice-grid two">${shuffledGauges.map(item=>`<button class="choice-btn gauge-option" data-gauge-id="${item.id}"><span class="choice-title">${item.label}</span><span class="choice-sub">${item.subtitle}</span></button>`).join("")}</div><h3 class="section-title" style="margin-top:18px;">Step 3 • Choose the correct vial</h3><div class="choice-grid two">${shuffledVials.map(v=>vialCard(v,getVialColor(v))).join("")}</div>`;bindSyringeChoices(scenario);bindGaugeChoices(scenario);bindVialChoices(scenario);return}
 if(state.mode==="calc"){modePanelEl.className="panel interaction-panel";modePanelEl.innerHTML=`<h3 class="section-title">Dose Challenge</h3><div class="mini-card" style="margin-bottom:14px;"><div class="route-icon ${scenario.route.toLowerCase()}">${guide.icon}</div><span class="mini-title">Prompt</span><p>Calculate the correct amount to draw for this order.</p></div><div class="slider-wrap"><label for="doseInput"><strong>Enter the correct amount</strong></label><input id="doseInput" type="text" placeholder="Example: 0.6 mL or 10 units" /><div class="draw-readout"><span>Use the vial strength shown on the prescription.</span><button id="submitDoseBtn" class="inline-btn">Check Answer</button></div></div>`;document.getElementById("submitDoseBtn").addEventListener("click",()=>{const val=document.getElementById("doseInput").value.trim().toLowerCase();if(!val)return showBad("Enter an answer first.","Add the exact amount to draw before checking.");if(normalizeDose(val)===normalizeDose(scenario.correctDose)){correctAdvance("Correct dose.",`${scenario.correctDose} is the correct amount for this prescription. ${scenario.explainCorrect}`)}else{showBad(`Not quite. Correct answer: ${scenario.correctDose}`,`Recheck the vial strength and ordered dose. ${scenario.explainCorrect}`)}});return}
-if(state.mode==="sites"){
-    modePanelEl.className="panel interaction-panel";
-    const options=buildSiteChoices(scenario.route);
-    modePanelEl.innerHTML=`<h3 class="section-title">Injection Site Practice</h3><div class="mini-card" style="margin-bottom:14px;"><span class="mini-title">Prompt</span><p>Select the best site for this route.</p></div><div class="choice-grid two">${options.map(opt=>`<button class="choice-btn site-option" data-site-route="${opt.route}" data-correct="${opt.correct}"><span class="choice-title">${opt.label}</span><span class="choice-sub">${opt.summary}</span></button>`).join("")}</div>`;
-    document.querySelectorAll(".site-option").forEach(btn=>btn.addEventListener("click",()=>{
-      if(btn.dataset.correct==="true"){
-        btn.classList.add("selected-correct");
-        correctAdvance("Correct site selected.", `${btn.querySelector('.choice-title').textContent} is an appropriate site for the ${scenario.route} route.`);
-      }else{
-        btn.classList.add("selected-wrong");
-        showBad("Not quite.", `${btn.querySelector('.choice-title').textContent} is not the best match for the ${scenario.route} route in this scenario.`);
-      }
-    }));
-    return
-  }
+if(state.mode==="sites"){modePanelEl.className="panel interaction-panel";const options=shuffleArray([{route:"IM",label:"IM Site Group",summary:"Deltoid, ventrogluteal, vastus lateralis"},{route:"SQ",label:"SQ Site Group",summary:"Back of arm, lower abdomen, top of thigh"},{route:"ID",label:"ID Site Group",summary:"Forearm, upper chest, upper back"}]);modePanelEl.innerHTML=`<h3 class="section-title">Injection Site Practice</h3><div class="mini-card" style="margin-bottom:14px;"><div class="route-icon ${scenario.route.toLowerCase()}">${guide.icon}</div><span class="mini-title">Prompt</span><p>Select the best site family for this route.</p></div><div class="choice-grid two">${options.map(opt=>`<button class="choice-btn site-option" data-site-route="${opt.route}"><span class="choice-title">${opt.label}</span><span class="choice-sub">${opt.summary}</span></button>`).join("")}</div>`;document.querySelectorAll(".site-option").forEach(btn=>btn.addEventListener("click",()=>{if(btn.dataset.siteRoute===scenario.route){btn.classList.add("selected-correct");correctAdvance("Correct site family selected.",`${scenario.route} uses sites such as ${routeGuides[scenario.route].siteMap}.`)}else{btn.classList.add("selected-wrong");showBad("Not quite.",`${scenario.route} is matched with: ${routeGuides[scenario.route].siteMap}.`)}}));return}
 modePanelEl.className="panel interaction-panel";const safetyOptions=shuffleArray(scenario.safetyOptions);modePanelEl.innerHTML=`<h3 class="section-title">Safety Check</h3><div class="mini-card" style="margin-bottom:14px;"><div class="route-icon ${scenario.route.toLowerCase()}">${guide.icon}</div><span class="mini-title">Scenario</span><p>${scenario.safetyPrompt}</p></div><div class="choice-grid two">${safetyOptions.map(opt=>`<button class="choice-btn safety-option" data-answer="${escapeHtml(opt)}"><span class="choice-title">${opt}</span></button>`).join("")}</div>`;document.querySelectorAll(".safety-option").forEach(btn=>btn.addEventListener("click",()=>{const answer=btn.dataset.answer;if(answer===scenario.safetyAnswer){btn.classList.add("selected-correct");correctAdvance("Correct safety issue identified.",`${scenario.safetyAnswer} is the best answer. ${scenario.explainCorrect}`)}else{btn.classList.add("selected-wrong");showBad(`Not quite. Correct answer: ${scenario.safetyAnswer}`,`This scenario is mainly about ${scenario.safetyAnswer.toLowerCase()}.`)}}))
 }
 function syringeDisplayName(id){if(id==="3ml")return"3 mL Syringe";if(id==="tuberculin")return"1 mL TB Syringe";if(id==="insulin")return"Unit Syringe";return id}
