@@ -80,7 +80,7 @@ function render(){
   currentModeEl.textContent = modeLabels[state.mode];
   progressTextEl.textContent = `${state.index + 1} / ${scenarios.length}`;
   scoreTextEl.textContent = state.score;
-  progressFillEl.style.width = `${((state.index) / scenarios.length) * 100}%`;
+  progressFillEl.style.width = `${(state.index / scenarios.length) * 100}%`;
 
   orderTextEl.textContent = scenario.order;
   medicationTextEl.textContent = scenario.medication;
@@ -106,20 +106,23 @@ function render(){
 
   clearFeedback();
   state.selectedSyringe = null;
-  renderModePanel(scenario, syringe);
+  renderModePanel(scenario, syringe, guide);
 }
 
-function renderModePanel(scenario, syringe){
+function renderModePanel(scenario, syringe, guide){
   if(state.mode === "tray"){
+    const shuffledSyringes = shuffleArray(syringeLibrary);
+    const shuffledVials = shuffleArray(scenario.vials);
+
     modePanelEl.innerHTML = `
       <h3 class="section-title">Step 1 • Choose the correct syringe</h3>
       <div class="choice-grid three">
-        ${syringeLibrary.map(item => syringeCard(item)).join("")}
+        ${shuffledSyringes.map(item => syringeCard(item)).join("")}
       </div>
 
       <h3 class="section-title" style="margin-top:18px;">Step 2 • Choose the correct vial</h3>
       <div class="choice-grid two">
-        ${scenario.vials.map(v => vialCard(v, v === scenario.medication ? scenario.vialColor : "#dfe6ea")).join("")}
+        ${shuffledVials.map(v => vialCard(v, getVialColor(v))).join("")}
       </div>
     `;
     bindSyringeChoices(scenario);
@@ -131,6 +134,7 @@ function renderModePanel(scenario, syringe){
     modePanelEl.innerHTML = `
       <h3 class="section-title">Dose Challenge</h3>
       <div class="mini-card" style="margin-bottom:14px;">
+        <div class="route-icon ${scenario.route.toLowerCase()}">${guide.icon}</div>
         <span class="mini-title">Prompt</span>
         <p>Calculate the correct amount to draw for this order.</p>
       </div>
@@ -138,28 +142,40 @@ function renderModePanel(scenario, syringe){
         <label for="doseInput"><strong>Enter the correct amount</strong></label>
         <input id="doseInput" type="text" placeholder="Example: 0.6 mL or 10 units" />
         <div class="draw-readout">
-          <span>Use the vial strength above.</span>
+          <span>Use the vial strength shown on the prescription.</span>
           <button id="submitDoseBtn" class="inline-btn">Check Answer</button>
         </div>
       </div>
     `;
     document.getElementById("submitDoseBtn").addEventListener("click", () => {
       const val = document.getElementById("doseInput").value.trim().toLowerCase();
-      if(!val) return showBad("Enter an answer first.");
+      if(!val) return showBad("Enter an answer first.", "Add the exact amount to draw before checking.");
       if(normalizeDose(val) === normalizeDose(scenario.correctDose)){
-        correctAdvance("Correct. Nice calculation.");
+        correctAdvance(
+          "Correct dose.",
+          `${scenario.correctDose} is the correct amount for this prescription. ${scenario.explainCorrect}`
+        );
       } else {
-        showBad(`Not quite. Correct answer: ${scenario.correctDose}`);
+        showBad(
+          `Not quite. Correct answer: ${scenario.correctDose}`,
+          `Recheck the vial strength and ordered dose. ${scenario.explainCorrect}`
+        );
       }
     });
     return;
   }
 
   if(state.mode === "sites"){
-    const options = shuffledSiteOptions(scenario.route);
+    const options = shuffleArray([
+      { route: "IM", label: "IM Site Group", summary: "Deltoid, ventrogluteal, vastus lateralis" },
+      { route: "SQ", label: "SQ Site Group", summary: "Back of arm, lower abdomen, top of thigh" },
+      { route: "ID", label: "ID Site Group", summary: "Forearm, upper chest, upper back" }
+    ]);
+
     modePanelEl.innerHTML = `
       <h3 class="section-title">Injection Site Practice</h3>
       <div class="mini-card" style="margin-bottom:14px;">
+        <div class="route-icon ${scenario.route.toLowerCase()}">${guide.icon}</div>
         <span class="mini-title">Prompt</span>
         <p>Select the best site family for this route.</p>
       </div>
@@ -175,24 +191,33 @@ function renderModePanel(scenario, syringe){
     document.querySelectorAll(".site-option").forEach(btn => {
       btn.addEventListener("click", () => {
         if(btn.dataset.siteRoute === scenario.route){
-          correctAdvance("Correct site family selected.");
+          btn.classList.add("selected-correct");
+          correctAdvance(
+            "Correct site family selected.",
+            `${scenario.route} uses sites such as ${routeGuides[scenario.route].siteMap}.`
+          );
         } else {
-          showBad(`Not quite. ${scenario.route} is matched with: ${routeGuides[scenario.route].siteMap}`);
           btn.classList.add("selected-wrong");
+          showBad(
+            "Not quite.",
+            `${scenario.route} is matched with: ${routeGuides[scenario.route].siteMap}.`
+          );
         }
       });
     });
     return;
   }
 
+  const safetyOptions = shuffleArray(scenario.safetyOptions);
   modePanelEl.innerHTML = `
     <h3 class="section-title">Safety Check</h3>
     <div class="mini-card" style="margin-bottom:14px;">
+      <div class="route-icon ${scenario.route.toLowerCase()}">${guide.icon}</div>
       <span class="mini-title">Scenario</span>
       <p>${scenario.safetyPrompt}</p>
     </div>
     <div class="choice-grid two">
-      ${scenario.safetyOptions.map(opt => `
+      ${safetyOptions.map(opt => `
         <button class="choice-btn safety-option" data-answer="${escapeHtml(opt)}">
           <span class="choice-title">${opt}</span>
         </button>
@@ -203,10 +228,17 @@ function renderModePanel(scenario, syringe){
     btn.addEventListener("click", () => {
       const answer = btn.dataset.answer;
       if(answer === scenario.safetyAnswer){
-        correctAdvance("Correct. You identified the main safety issue.");
+        btn.classList.add("selected-correct");
+        correctAdvance(
+          "Correct safety issue identified.",
+          `${scenario.safetyAnswer} is the best answer. ${scenario.explainCorrect}`
+        );
       } else {
         btn.classList.add("selected-wrong");
-        showBad(`Not quite. Correct answer: ${scenario.safetyAnswer}`);
+        showBad(
+          `Not quite. Correct answer: ${scenario.safetyAnswer}`,
+          `This scenario is mainly about ${scenario.safetyAnswer.toLowerCase()}.`
+        );
       }
     });
   });
@@ -248,11 +280,14 @@ function bindSyringeChoices(scenario){
       if(btn.dataset.syringeId === scenario.syringeType){
         btn.classList.add("selected-correct");
         state.selectedSyringe = btn.dataset.syringeId;
-        showGood("Correct syringe selected. Now choose the vial.");
+        showGood("Correct syringe selected.", scenario.explainCorrect);
       } else {
         btn.classList.add("selected-wrong");
         state.selectedSyringe = null;
-        showBad(`Not quite. Best syringe: ${syringeLibrary.find(s => s.id === scenario.syringeType).name}`);
+        showBad(
+          `Not quite. Best syringe: ${syringeLibrary.find(s => s.id === scenario.syringeType).name}`,
+          scenario.explainWrongSyringe
+        );
       }
     });
   });
@@ -263,24 +298,24 @@ function bindVialChoices(scenario){
     btn.addEventListener("click", () => {
       document.querySelectorAll(".vial-option").forEach(x => x.classList.remove("selected-correct","selected-wrong"));
       if(!state.selectedSyringe || state.selectedSyringe !== scenario.syringeType){
-        showBad("Choose the correct syringe first.");
+        showBad("Choose the correct syringe first.", "Students should verify the syringe before final medication preparation.");
         return;
       }
       if(btn.dataset.vialName === scenario.medication){
         btn.classList.add("selected-correct");
-        correctAdvance("Correct vial selected.");
+        correctAdvance("Correct vial selected.", scenario.explainCorrect);
       } else {
         btn.classList.add("selected-wrong");
-        showBad(`Not quite. Correct vial: ${scenario.medication}`);
+        showBad(`Not quite. Correct vial: ${scenario.medication}`, scenario.explainWrongVial);
       }
     });
   });
 }
 
-function correctAdvance(message){
+function correctAdvance(message, explanation){
   state.score += 1;
   scoreTextEl.textContent = state.score;
-  showGood(message);
+  showGood(message, explanation);
   setTimeout(() => {
     state.index += 1;
     if(state.index >= scenarios.length){
@@ -288,7 +323,7 @@ function correctAdvance(message){
     } else {
       render();
     }
-  }, 900);
+  }, 1100);
 }
 
 function showResults(){
@@ -304,12 +339,26 @@ function showResults(){
   resultsBodyEl.textContent = `You scored ${state.score} out of ${total} in ${modeLabels[state.mode]}.`;
 }
 
-function showGood(message){
-  feedbackBoxEl.innerHTML = `<div class="feedback good">${message}</div>`;
+function showGood(message, explanation){
+  feedbackBoxEl.innerHTML = `
+    <div class="feedback good">
+      <span class="feedback-title">Correct</span>
+      ${message}
+      <span class="explain">${explanation || ""}</span>
+    </div>
+  `;
 }
-function showBad(message){
-  feedbackBoxEl.innerHTML = `<div class="feedback bad">${message}</div>`;
+
+function showBad(message, explanation){
+  feedbackBoxEl.innerHTML = `
+    <div class="feedback bad">
+      <span class="feedback-title">Try Again</span>
+      ${message}
+      <span class="explain">${explanation || ""}</span>
+    </div>
+  `;
 }
+
 function clearFeedback(){
   feedbackBoxEl.innerHTML = "";
 }
@@ -318,13 +367,18 @@ function normalizeDose(str){
   return str.replace(/\s+/g," ").trim().toLowerCase();
 }
 
-function shuffledSiteOptions(correctRoute){
-  const bank = [
-    { route: "IM", label: "IM Site Group", summary: "Deltoid, ventrogluteal, vastus lateralis" },
-    { route: "SQ", label: "SQ Site Group", summary: "Back of arm, lower abdomen, top of thigh" },
-    { route: "ID", label: "ID Site Group", summary: "Forearm, upper chest, upper back" }
-  ];
-  return bank.sort(() => Math.random() - 0.5);
+function shuffleArray(arr){
+  const copy = [...arr];
+  for(let i = copy.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function getVialColor(name){
+  const match = scenarios.find(s => s.medication === name);
+  return match ? match.vialColor : "#d8e2e8";
 }
 
 function escapeHtml(s){
