@@ -1,30 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Injection Lab Trainer</title>
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Injection Lab Trainer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
+  <div class="app-shell">
+    <header class="hero">
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <p class="eyebrow">Practice Simulation</p>
+          <h1>Injection Lab Trainer</h1>
+          <p class="hero-sub">A polished practice game for medication identification, route recognition, syringe selection, and injection-site awareness.</p>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-card">
+            <span class="stat-label">Mode</span>
+            <span id="currentMode" class="stat-value">Medication Tray</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Progress</span>
+            <span id="progressText" class="stat-value">1 / 12</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Score</span>
+            <span id="scoreText" class="stat-value">0</span>
+          </div>
+        </div>
+      </div>
+    </header>
 
-<header>
-<h1>Injection Lab Trainer</h1>
-<p>Practice Simulation</p>
-</header>
+    <main class="page">
+      <section id="homeScreen" class="home-screen">
+        <div class="panel panel-large">
+          <div class="pill">Interactive Clinical Practice</div>
+          <h2>A much prettier version, with actual structure.</h2>
+          <p class="muted">
+            Choose a practice mode, work through realistic injection scenarios, and build confidence with route cues,
+            syringe matching, site guidance, and instant feedback.
+          </p>
 
-<main>
+          <div class="mode-grid">
+            <button class="mode-card" data-mode="tray">
+              <div class="mode-icon">🧪</div>
+              <div class="mode-title">Medication Tray</div>
+              <div class="mode-desc">Choose the correct syringe, then match the correct vial.</div>
+            </button>
 
-<div id="game"></div>
+            <button class="mode-card" data-mode="calc">
+              <div class="mode-icon">📏</div>
+              <div class="mode-title">Dose Challenge</div>
+              <div class="mode-desc">Calculate the correct mL or insulin units from the order.</div>
+            </button>
 
-</main>
+            <button class="mode-card" data-mode="sites">
+              <div class="mode-icon">🩺</div>
+              <div class="mode-title">Injection Sites</div>
+              <div class="mode-desc">Identify the proper site family for IM, SQ, and ID injections.</div>
+            </button>
 
-<footer>
-PCT Institute of Healthcare • Injection Practice Simulator • Educational Use Only
-</footer>
+            <button class="mode-card" data-mode="safety">
+              <div class="mode-icon">⚠️</div>
+              <div class="mode-title">Safety Check</div>
+              <div class="mode-desc">Spot the most important preparation or route error.</div>
+            </button>
+          </div>
+        </div>
 
-<script src="scenarios.js"></script>
-<script src="app.js"></script>
+        <div class="panel side-panel">
+          <h3>Included content</h3>
+          <div class="badge-list">
+            <span class="badge">IM</span>
+            <span class="badge">SQ</span>
+            <span class="badge">Insulin</span>
+            <span class="badge">ID</span>
+          </div>
 
+          <div class="site-groups">
+            <div class="site-group">
+              <h4>IM Sites</h4>
+              <p>Deltoid, Ventrogluteal, Vastus Lateralis</p>
+            </div>
+            <div class="site-group">
+              <h4>SQ Sites</h4>
+              <p>Back of arm, lower abdomen, top of thigh</p>
+            </div>
+            <div class="site-group">
+              <h4>ID Sites</h4>
+              <p>Forearm, upper chest, upper back</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="gameScreen" class="game-screen hidden">
+        <div class="top-actions">
+          <button id="backHomeBtn" class="ghost-btn">← Home</button>
+          <div class="progress-wrap">
+            <div class="progress-bar">
+              <div id="progressFill" class="progress-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="game-grid">
+          <div class="left-stack">
+            <div class="panel prescription-panel">
+              <div class="panel-head">
+                <span class="small-label">Prescription</span>
+                <span id="routePill" class="route-pill">IM</span>
+              </div>
+              <h2 id="orderText">Dexamethasone 6 mg IM</h2>
+              <div class="prescription-meta">
+                <div><strong>Medication:</strong> <span id="medicationText"></span></div>
+                <div><strong>Vial strength:</strong> <span id="strengthText"></span></div>
+                <div><strong>Best syringe:</strong> <span id="bestSyringeText"></span></div>
+              </div>
+            </div>
+
+            <div class="panel cue-panel">
+              <div class="mini-grid">
+                <div class="mini-card">
+                  <span class="mini-title">Route Cue</span>
+                  <p id="routeCueText"></p>
+                </div>
+                <div class="mini-card">
+                  <span class="mini-title">Needle Angle</span>
+                  <p id="angleText"></p>
+                </div>
+                <div class="mini-card">
+                  <span class="mini-title">Needle Length</span>
+                  <p id="lengthText"></p>
+                </div>
+                <div class="mini-card">
+                  <span class="mini-title">Site Map</span>
+                  <p id="siteMapText"></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel site-diagram-panel">
+              <div class="diagram-head">
+                <span class="small-label">Visual Site Guide</span>
+                <span id="siteFamilyText" class="soft-label">Injection Sites</span>
+              </div>
+              <div id="siteDiagram" class="site-diagram"></div>
+            </div>
+          </div>
+
+          <div class="right-stack">
+            <div id="modePanel" class="panel interaction-panel"></div>
+            <div id="feedbackBox" class="feedback-box"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="resultsScreen" class="results-screen hidden">
+        <div class="panel results-panel">
+          <div class="results-icon">✨</div>
+          <p class="eyebrow dark">Session Complete</p>
+          <h2 id="resultsTitle">Safe Injector</h2>
+          <p id="resultsBody" class="muted"></p>
+          <div class="results-actions">
+            <button id="playAgainBtn" class="primary-btn">Practice Again</button>
+            <button id="resultsHomeBtn" class="ghost-btn">Return Home</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-inner">
+        <span>PCT Institute of Healthcare</span>
+        <span>Injection Practice Simulator • Educational Use Only</span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="scenarios.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
