@@ -7,144 +7,75 @@ document.querySelectorAll(".mode-card").forEach(btn=>btn.addEventListener("click
 document.getElementById("backHomeBtn").addEventListener("click",goHome);
 document.getElementById("resultsHomeBtn").addEventListener("click",goHome);
 document.getElementById("playAgainBtn").addEventListener("click",()=>startMode(state.mode));
-function startMode(mode){state.mode=mode;state.index=0;state.score=0;state.selectedSyringe=null;state.selectedGauge=null;state.readyForNext=false;state.questionSet=shuffleArray(scenarios);showScreen("game");render()}
+function startMode(mode){
+  state.mode=mode;state.index=0;state.score=0;state.selectedSyringe=null;state.selectedGauge=null;state.readyForNext=false;state.questionSet=shuffleArray(scenarios);showScreen("game");render()
+}
 function goHome(){showScreen("home");clearFeedback()}
 function showScreen(screen){homeScreen.classList.add("hidden");gameScreen.classList.add("hidden");resultsScreen.classList.add("hidden");if(screen==="home")homeScreen.classList.remove("hidden");if(screen==="game")gameScreen.classList.remove("hidden");if(screen==="results")resultsScreen.classList.remove("hidden")}
-function render(){const scenario=state.questionSet[state.index]||scenarios[state.index],guide=routeGuides[scenario.route],syringe=syringeLibrary.find(s=>s.id===scenario.syringeType);currentModeEl.textContent=modeLabels[state.mode];progressTextEl.textContent=`${state.index+1} / ${state.questionSet.length||scenarios.length}`;scoreTextEl.textContent=state.score;progressFillEl.style.width=`${state.index/(state.questionSet.length||scenarios.length)*100}%`;orderTextEl.textContent=scenario.order;medicationTextEl.textContent=scenario.medication;strengthTextEl.textContent=scenario.strength;bestSyringeTextEl.textContent=syringeDisplayName(syringe.id);routePillEl.textContent=scenario.route;siteFamilyTextEl.textContent=`${scenario.route} Site Family`;routeCueTextEl.textContent=guide.cue;angleTextEl.textContent=guide.angle;lengthTextEl.textContent=guide.length;siteMapTextEl.textContent=guide.siteMap;siteDiagramEl.innerHTML=guide.sites.map(site=>`<div class="site-chip"><div><div class="site-name">${site.name}</div><div class="site-meta">${site.meta}</div></div><div class="soft-label">${scenario.route}</div></div>`).join("");clearFeedback();state.selectedSyringe=null;state.selectedGauge=null;renderModePanel(scenario,syringe,guide)}
+function render(){
+  const scenario=state.questionSet[state.index]||scenarios[state.index],guide=routeGuides[scenario.route],syringe=syringeLibrary.find(s=>s.id===scenario.syringeType);
+  currentModeEl.textContent=modeLabels[state.mode];
+  progressTextEl.textContent=`${state.index+1} / ${state.questionSet.length||scenarios.length}`;
+  scoreTextEl.textContent=state.score;
+  progressFillEl.style.width=`${state.index/(state.questionSet.length||scenarios.length)*100}%`;
 
-function renderBodyDiagram(route){
-  if(route==="IM"){
-    return `<div class="body-diagram-wrap">
-      <div class="body-card">
-        <div class="body-card-title">Front View</div>
-        ${frontBodySVG([{x:126,y:66,cls:"im"},{x:92,y:145,cls:"im"},{x:160,y:145,cls:"im"}])}
-      </div>
-      <div class="site-legend">
-        <div class="site-legend-item"><span class="site-dot im"></span><div><strong>Deltoid</strong><br><span>Upper arm muscle</span></div></div>
-        <div class="site-legend-item"><span class="site-dot im"></span><div><strong>Vastus Lateralis</strong><br><span>Outer thigh muscle</span></div></div>
-        <div class="site-legend-item"><span class="site-dot im"></span><div><strong>Ventrogluteal</strong><br><span>Hip area</span></div></div>
-      </div>
-    </div>`;
+  orderTextEl.textContent=scenario.order;
+  medicationTextEl.textContent=scenario.medication;
+  strengthTextEl.textContent=scenario.strength;
+  bestSyringeTextEl.textContent=syringeDisplayName(syringe.id);
+  routePillEl.textContent=scenario.route;
+  siteFamilyTextEl.textContent=`${scenario.route} Site Family`;
+  routeCueTextEl.textContent=guide.cue;
+  angleTextEl.textContent=guide.angle;
+  lengthTextEl.textContent=guide.length;
+  siteMapTextEl.textContent=guide.siteMap;
+
+  clearFeedback();
+  state.selectedSyringe=null;
+  state.selectedGauge=null;
+  state.readyForNext=false;
+
+  const gameGrid=document.querySelector(".game-grid");
+  if(gameGrid){
+    gameGrid.classList.toggle("tray-layout", state.mode==="tray");
   }
-  if(route==="SQ"){
-    return `<div class="body-diagram-wrap">
-      <div class="body-card">
-        <div class="body-card-title">Front View</div>
-        ${frontBodySVG([{x:88,y:92,cls:"sq"},{x:126,y:112,cls:"sq"},{x:160,y:145,cls:"sq"}])}
-      </div>
-      <div class="site-legend">
-        <div class="site-legend-item"><span class="site-dot sq"></span><div><strong>Back of Upper Arm</strong><br><span>Fat tissue area</span></div></div>
-        <div class="site-legend-item"><span class="site-dot sq"></span><div><strong>Lower Abdomen</strong><br><span>2 inches from navel</span></div></div>
-        <div class="site-legend-item"><span class="site-dot sq"></span><div><strong>Top of Thigh</strong><br><span>Fat tissue area</span></div></div>
-      </div>
-    </div>`;
+  if(feedbackBoxEl){
+    feedbackBoxEl.classList.toggle("tray-feedback", state.mode==="tray");
   }
-  return `<div class="body-diagram-wrap">
-    <div class="body-card">
-      <div class="body-card-title">Common Test Sites</div>
-      ${dualBodySVG()}
-    </div>
-    <div class="site-legend">
-      <div class="site-legend-item"><span class="site-dot id"></span><div><strong>Forearm</strong><br><span>Most common for PPD</span></div></div>
-      <div class="site-legend-item"><span class="site-dot id"></span><div><strong>Upper Chest</strong><br><span>Skin testing site</span></div></div>
-      <div class="site-legend-item"><span class="site-dot id"></span><div><strong>Upper Back</strong><br><span>Between shoulder blades</span></div></div>
-    </div>
-  </div>`;
-}
 
-function frontBodySVG(markers){
-  const dots = markers.map(m=>`<circle cx="${m.x}" cy="${m.y}" r="6.5" fill="${m.cls==="im"?"#f4c542":"#f26c4f"}" stroke="#fff" stroke-width="2"/>`).join("");
-  return `<svg class="body-svg" viewBox="0 0 250 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <defs><linearGradient id="skinGradFront" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#f7dfcf"/><stop offset="100%" stop-color="#efc9b6"/></linearGradient></defs>
-    <circle cx="125" cy="36" r="20" fill="url(#skinGradFront)" stroke="#d9b29d" stroke-width="2"/>
-    <rect x="108" y="55" width="34" height="24" rx="12" fill="url(#skinGradFront)" stroke="#d9b29d" stroke-width="2"/>
-    <rect x="90" y="76" width="70" height="74" rx="26" fill="url(#skinGradFront)" stroke="#d9b29d" stroke-width="2"/>
-    <rect x="66" y="82" width="22" height="70" rx="11" fill="url(#skinGradFront)" stroke="#d9b29d" stroke-width="2"/>
-    <rect x="162" y="82" width="22" height="70" rx="11" fill="url(#skinGradFront)" stroke="#d9b29d" stroke-width="2"/>
-    <rect x="100" y="148" width="20" height="82" rx="10" fill="url(#skinGradFront)" stroke="#d9b29d" stroke-width="2"/>
-    <rect x="130" y="148" width="20" height="82" rx="10" fill="url(#skinGradFront)" stroke="#d9b29d" stroke-width="2"/>
-    ${dots}
-  </svg>`;
-}
+  if(bestSyringeTextEl && bestSyringeTextEl.parentElement){
+    bestSyringeTextEl.parentElement.style.display = state.mode==="tray" ? "none" : "block";
+  }
+  if(siteMapTextEl && siteMapTextEl.parentElement){
+    siteMapTextEl.parentElement.style.display = state.mode==="sites" ? "none" : "block";
+  }
+  if(siteDiagramEl && siteDiagramEl.parentElement){
+    siteDiagramEl.parentElement.style.display = state.mode==="sites" ? "none" : "block";
+  }
 
-function dualBodySVG(){
-  return `<svg class="body-svg" viewBox="0 0 320 250" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <defs><linearGradient id="skinGradDual" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#f7dfcf"/><stop offset="100%" stop-color="#efc9b6"/></linearGradient></defs>
-    <g transform="translate(20,0)">
-      <circle cx="70" cy="36" r="18" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
-      <rect x="55" y="54" width="30" height="22" rx="11" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
-      <rect x="38" y="74" width="64" height="70" rx="24" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
-      <rect x="18" y="82" width="18" height="66" rx="9" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
-      <rect x="104" y="82" width="18" height="66" rx="9" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
-      <rect x="48" y="142" width="18" height="76" rx="9" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
-      <rect x="74" y="142" width="18" height="76" rx="9" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
-      <circle cx="36" cy="118" r="6.5" fill="#7c94c7" stroke="#fff" stroke-width="2"/>
-      <circle cx="70" cy="96" r="6.5" fill="#7c94c7" stroke="#fff" stroke-width="2"/>
-    </g>
-    <g transform="translate(170,0)">
-      <circle cx="70" cy="36" r="18" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
-      <rect x="55" y="54" width="30" height="22" rx="11" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
-      <rect x="38" y="74" width="64" height="70" rx="24" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
-      <rect x="18" y="82" width="18" height="66" rx="9" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
-      <rect x="104" y="82" width="18" height="66" rx="9" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
-      <rect x="48" y="142" width="18" height="76" rx="9" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
-      <rect x="74" y="142" width="18" height="76" rx="9" fill="url(#skinGradDual)" stroke="#d9b29d" stroke-width="2"/>
-      <circle cx="70" cy="92" r="6.5" fill="#7c94c7" stroke="#fff" stroke-width="2"/>
-    </g>
-  </svg>`;
-}
-
-
-
-function buildSiteChoices(route){
-  const correctPool = routeGuides[route].sites.map(s => ({label:s.name, route, summary:s.meta, correct:true}));
-  const correctChoice = shuffleArray(correctPool)[0];
-  const distractors = [];
-  Object.entries(routeGuides).forEach(([r,g]) => {
-    if(r !== route){
-      g.sites.forEach(s => distractors.push({label:s.name, route:r, summary:s.meta, correct:false}));
-    }
-  });
-  const pickedDistractors = shuffleArray(distractors).slice(0,3);
-  return shuffleArray([correctChoice, ...pickedDistractors]);
-}
-
-function renderModePanel(scenario,syringe,guide){
-if(state.mode==="tray"){
-    modePanelEl.className="panel interaction-panel tray-mode";
-    const shuffledSyringes=shuffleArray(syringeLibrary),shuffledVials=shuffleArray(scenario.vials),shuffledGauges=shuffleArray(gaugeLibrary);
-    modePanelEl.innerHTML=`
-      <div class="tray-board">
-        <div class="tray-section">
-          <div class="tray-step">Step 1 • Syringe</div>
-          <div class="tray-options compact-three">
-            ${shuffledSyringes.map(item=>syringeCard(item)).join("")}
-          </div>
-        </div>
-        <div class="tray-section">
-          <div class="tray-step">Step 2 • Needle Gauge</div>
-          <div class="tray-options compact-two">
-            ${shuffledGauges.map(item=>`<button class="choice-btn gauge-option" data-gauge-id="${item.id}"><span class="choice-title">${item.label}</span></button>`).join("")}
-          </div>
-        </div>
-        <div class="tray-section">
-          <div class="tray-step">Step 3 • Vial</div>
-          <div class="tray-options compact-two">
-            ${shuffledVials.map(v=>vialCard(v,getVialColor(v))).join("")}
-          </div>
-        </div>
-      </div>`;
-    bindSyringeChoices(scenario);
-    bindGaugeChoices(scenario);
-    bindVialChoices(scenario);
+  if(state.mode==="sites"){
+    modePanelEl.className="panel interaction-panel";
+    const options=buildSiteChoices(scenario.route);
+    modePanelEl.innerHTML=`<h3 class="section-title">Injection Site Practice</h3><div class="mini-card" style="margin-bottom:14px;"><span class="mini-title">Prompt</span><p>Select the best site for this route.</p></div><div class="choice-grid two">${options.map(opt=>`<button class="choice-btn site-option" data-correct="${opt.correct}"><span class="choice-title">${opt.label}</span><span class="choice-sub">${opt.summary}</span></button>`).join("")}</div>`;
+    document.querySelectorAll(".site-option").forEach(btn=>btn.addEventListener("click",()=>{
+      document.querySelectorAll(".site-option").forEach(x=>x.classList.remove("selected-correct","selected-wrong"));
+      if(btn.dataset.correct==="true"){
+        btn.classList.add("selected-correct");
+        correctAdvance("Correct site selected.", `${btn.querySelector('.choice-title').textContent} is an appropriate site for the ${scenario.route} route.`);
+      }else{
+        btn.classList.add("selected-wrong");
+        showBad("Not quite.", `${btn.querySelector('.choice-title').textContent} is not the best match for the ${scenario.route} route in this scenario.`);
+      }
+    }));
     return
   }
 if(state.mode==="calc"){modePanelEl.className="panel interaction-panel";modePanelEl.innerHTML=`<h3 class="section-title">Dose Challenge</h3><div class="mini-card" style="margin-bottom:14px;"><div class="route-icon ${scenario.route.toLowerCase()}">${guide.icon}</div><span class="mini-title">Prompt</span><p>Calculate the correct amount to draw for this order.</p></div><div class="slider-wrap"><label for="doseInput"><strong>Enter the correct amount</strong></label><input id="doseInput" type="text" placeholder="Example: 0.6 mL or 10 units" /><div class="draw-readout"><span>Use the vial strength shown on the prescription.</span><button id="submitDoseBtn" class="inline-btn">Check Answer</button></div></div>`;document.getElementById("submitDoseBtn").addEventListener("click",()=>{const val=document.getElementById("doseInput").value.trim().toLowerCase();if(!val)return showBad("Enter an answer first.","Add the exact amount to draw before checking.");if(normalizeDose(val)===normalizeDose(scenario.correctDose)){correctAdvance("Correct dose.",`${scenario.correctDose} is the correct amount for this prescription. ${scenario.explainCorrect}`)}else{showBad(`Not quite. Correct answer: ${scenario.correctDose}`,`Recheck the vial strength and ordered dose. ${scenario.explainCorrect}`)}});return}
 if(state.mode==="sites"){
     modePanelEl.className="panel interaction-panel";
     const options=buildSiteChoices(scenario.route);
-    modePanelEl.innerHTML=`<h3 class="section-title">Injection Site Practice</h3><div class="mini-card" style="margin-bottom:14px;"><span class="mini-title">Prompt</span><p>Select the best site for this route.</p></div><div class="choice-grid two">${options.map(opt=>`<button class="choice-btn site-option" data-site-route="${opt.route}" data-correct="${opt.correct}"><span class="choice-title">${opt.label}</span><span class="choice-sub">${opt.summary}</span></button>`).join("")}</div>`;
+    modePanelEl.innerHTML=`<h3 class="section-title">Injection Site Practice</h3><div class="mini-card" style="margin-bottom:14px;"><span class="mini-title">Prompt</span><p>Select the best site for this route.</p></div><div class="choice-grid two">${options.map(opt=>`<button class="choice-btn site-option" data-correct="${opt.correct}"><span class="choice-title">${opt.label}</span><span class="choice-sub">${opt.summary}</span></button>`).join("")}</div>`;
     document.querySelectorAll(".site-option").forEach(btn=>btn.addEventListener("click",()=>{
+      document.querySelectorAll(".site-option").forEach(x=>x.classList.remove("selected-correct","selected-wrong"));
       if(btn.dataset.correct==="true"){
         btn.classList.add("selected-correct");
         correctAdvance("Correct site selected.", `${btn.querySelector('.choice-title').textContent} is an appropriate site for the ${scenario.route} route.`);
@@ -187,3 +118,16 @@ function getVialColor(name){const match=scenarios.find(s=>s.medication===name);r
 function safeId(str){return str.toLowerCase().replace(/[^a-z0-9]+/g,"-")}
 function correctGaugeId(route){if(route==="IM")return"im";if(route==="SQ")return"sq";return"id"}
 function escapeHtml(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function buildSiteChoices(route){
+  const correctPool = routeGuides[route].sites.map(s => ({label:s.name, summary:s.meta, correct:true}));
+  const correctChoice = shuffleArray(correctPool)[0];
+  const distractors = [];
+  Object.entries(routeGuides).forEach(([r,g]) => {
+    if(r !== route){
+      g.sites.forEach(s => distractors.push({label:s.name, summary:s.meta, correct:false}));
+    }
+  });
+  return shuffleArray([correctChoice, ...shuffleArray(distractors).slice(0,3)]);
+}
+
+
