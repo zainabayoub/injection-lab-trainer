@@ -156,3 +156,82 @@ footer{border-top:1px solid #e8ddd3;padding:20px;color:#5b6771}
   background:linear-gradient(135deg,var(--mimosa), #efb72b);
   color:#4a3601;
 }
+
+
+/* V9 tray horizontal layout patch */
+.game-grid.tray-horizontal{
+  grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);
+  grid-template-areas:
+    "prescription feedback"
+    "tray tray"
+    "cues sites";
+  align-items:start;
+}
+.game-grid.tray-horizontal .left-stack,
+.game-grid.tray-horizontal .right-stack{
+  display:contents;
+}
+.game-grid.tray-horizontal .prescription-panel{grid-area:prescription;}
+.game-grid.tray-horizontal #feedbackBox{grid-area:feedback;}
+.game-grid.tray-horizontal #modePanel{grid-area:tray;}
+.game-grid.tray-horizontal .cue-panel{grid-area:cues;}
+.game-grid.tray-horizontal .site-diagram-panel{grid-area:sites;}
+.game-grid.tray-horizontal .panel{padding:18px;}
+.game-grid.tray-horizontal .prescription-panel h2{font-size:30px;margin:8px 0 12px;}
+.game-grid.tray-horizontal .prescription-meta{gap:8px;line-height:1.5;}
+.game-grid.tray-horizontal .mini-grid{gap:10px;}
+.game-grid.tray-horizontal .mini-card{padding:12px;}
+.game-grid.tray-horizontal .site-chip{padding:12px 14px;}
+.game-grid.tray-horizontal .interaction-panel.tray-mode{
+  min-height:auto;
+}
+.game-grid.tray-horizontal .interaction-panel.tray-mode .choice-grid.three{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+.game-grid.tray-horizontal .interaction-panel.tray-mode .choice-grid.two{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+.game-grid.tray-horizontal .interaction-panel.tray-mode .choice-btn{
+  padding:12px;
+  border-radius:18px;
+}
+.game-grid.tray-horizontal .interaction-panel.tray-mode .vial-graphic{
+  width:88px;
+  height:112px;
+  margin:2px auto 10px;
+}
+.game-grid.tray-horizontal .interaction-panel.tray-mode .syringe-graphic{
+  height:64px;
+  margin:0 auto 8px;
+}
+.game-grid.tray-horizontal .section-title{
+  margin:0 0 10px;
+}
+.feedback-box.tray-feedback{
+  min-height:0;
+  align-self:start;
+}
+.feedback-box.tray-feedback .feedback{
+  padding:14px 16px;
+  border-radius:20px;
+}
+@media (max-width:980px){
+  .game-grid.tray-horizontal{
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "prescription"
+      "feedback"
+      "tray"
+      "cues"
+      "sites";
+  }
+  .game-grid.tray-horizontal .interaction-panel.tray-mode .choice-grid.two{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media (max-width:680px){
+  .game-grid.tray-horizontal .interaction-panel.tray-mode .choice-grid.three,
+  .game-grid.tray-horizontal .interaction-panel.tray-mode .choice-grid.two{
+    grid-template-columns:1fr;
+  }
+}
