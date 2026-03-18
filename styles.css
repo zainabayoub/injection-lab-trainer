@@ -245,6 +245,10 @@ footer{border-top:1px solid #e8ddd3;padding:20px;color:#5b6771}
 .site-answer-grid{gap:14px;}
 .site-answer-option{padding:12px;}
 .site-answer-art{margin:0 0 10px;}
+.site-option-svg{display:block;width:100%;height:auto;}
+.site-view-label{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;fill:#7b8aa0;}
+.site-answer-option .choice-title{display:block;margin-top:2px;}
+.site-answer-option .choice-sub{display:block;line-height:1.45;}
 .site-option-svg{width:100%;height:110px;display:block;}
 .sites-mode .choice-title{display:block;font-size:18px;margin-bottom:4px;}
 .sites-mode .choice-sub{font-size:13px;line-height:1.5;}
