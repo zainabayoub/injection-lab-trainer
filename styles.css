@@ -244,12 +244,11 @@ footer{border-top:1px solid #e8ddd3;padding:20px;color:#5b6771}
 .sites-mode .site-prompt-card{background:linear-gradient(180deg,#fffaf7 0%,#fff1eb 100%);}
 .site-answer-grid{gap:14px;}
 .site-answer-option{padding:12px;}
-.site-answer-art{margin:0 0 10px;}
-.site-option-svg{display:block;width:100%;height:auto;}
-.site-view-label{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;fill:#7b8aa0;}
+.site-answer-art{margin:0 0 10px;border:1px solid #d8dfe5;border-radius:18px;background:#ffffff;overflow:hidden;}
+.site-option-image{display:block;width:100%;height:150px;object-fit:contain;background:#ffffff;}
 .site-answer-option .choice-title{display:block;margin-top:2px;}
 .site-answer-option .choice-sub{display:block;line-height:1.45;}
-.site-option-svg{width:100%;height:110px;display:block;}
+.site-answer-option{padding:12px;}
 .sites-mode .choice-title{display:block;font-size:18px;margin-bottom:4px;}
 .sites-mode .choice-sub{font-size:13px;line-height:1.5;}
 @media (max-width:980px){.game-grid.sites-quiz{grid-template-columns:1fr;}}

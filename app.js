@@ -98,98 +98,39 @@ function dualBodySVG(){
 function renderModePanel(scenario,syringe,guide){
 if(state.mode==="tray"){modePanelEl.className="panel interaction-panel tray-mode";const shuffledSyringes=shuffleArray(syringeLibrary),shuffledVials=shuffleArray(scenario.vials),shuffledGauges=shuffleArray(gaugeLibrary);modePanelEl.innerHTML=`<h3 class="section-title">Step 1 • Choose the correct syringe</h3><div class="choice-grid three">${shuffledSyringes.map(item=>syringeCard(item)).join("")}</div><h3 class="section-title" style="margin-top:18px;">Step 2 • Choose the correct needle gauge</h3><div class="choice-grid two">${shuffledGauges.map(item=>`<button class="choice-btn gauge-option" data-gauge-id="${item.id}"><span class="choice-title">${item.label}</span><span class="choice-sub">${item.subtitle}</span></button>`).join("")}</div><h3 class="section-title" style="margin-top:18px;">Step 3 • Choose the correct vial</h3><div class="choice-grid two">${shuffledVials.map(v=>vialCard(v,getVialColor(v))).join("")}</div>`;bindSyringeChoices(scenario);bindGaugeChoices(scenario);bindVialChoices(scenario);return}
 if(state.mode==="calc"){modePanelEl.className="panel interaction-panel";modePanelEl.innerHTML=`<h3 class="section-title">Dose Challenge</h3><div class="mini-card" style="margin-bottom:14px;"><div class="route-icon ${scenario.route.toLowerCase()}">${guide.icon}</div><span class="mini-title">Prompt</span><p>Calculate the correct amount to draw for this order.</p></div><div class="slider-wrap"><label for="doseInput"><strong>Enter the correct amount</strong></label><input id="doseInput" type="text" placeholder="Example: 0.6 mL or 10 units" /><div class="draw-readout"><span>Use the vial strength shown on the prescription.</span><button id="submitDoseBtn" class="inline-btn">Check Answer</button></div></div>`;document.getElementById("submitDoseBtn").addEventListener("click",()=>{const val=document.getElementById("doseInput").value.trim().toLowerCase();if(!val)return showBad("Enter an answer first.","Add the exact amount to draw before checking.");if(normalizeDose(val)===normalizeDose(scenario.correctDose)){correctAdvance("Correct dose.",`${scenario.correctDose} is the correct amount for this prescription. ${scenario.explainCorrect}`)}else{showBad(`Not quite. Correct answer: ${scenario.correctDose}`,`Recheck the vial strength and ordered dose. ${scenario.explainCorrect}`)}});return}
-if(state.mode==="sites"){modePanelEl.className="panel interaction-panel sites-mode";const correctSite=pickRandom(routeGuides[scenario.route].sites);const distractors=[pickRandom(routeGuides[scenario.route==="IM"?"SQ":"IM"].sites),pickRandom(routeGuides[scenario.route==="ID"?"SQ":"ID"].sites),pickRandom(nonInjectionSites)];const options=shuffleArray([{kind:"route-site",route:scenario.route,name:correctSite.name,meta:correctSite.meta,correct:true},{kind:"route-site",route:scenario.route==="IM"?"SQ":"IM",name:distractors[0].name,meta:distractors[0].meta,correct:false},{kind:"route-site",route:scenario.route==="ID"?"SQ":"ID",name:distractors[1].name,meta:distractors[1].meta,correct:false},{kind:"non-site",route:"NONE",name:distractors[2].name,meta:distractors[2].meta,correct:false}]);modePanelEl.innerHTML=`<h3 class="section-title">Choose the correct injection site</h3><div class="mini-card site-prompt-card" style="margin-bottom:14px;"><div class="route-icon ${scenario.route.toLowerCase()}">${guide.icon}</div><span class="mini-title">Prompt</span><p>Choose the best injection site for this prescription. Only one answer is appropriate.</p></div><div class="choice-grid two site-answer-grid">${options.map((opt,index)=>`<button class="choice-btn site-answer-option" data-correct="${opt.correct?"yes":"no"}" data-answer-name="${escapeHtml(opt.name)}" data-answer-route="${opt.route}"><div class="site-answer-art">${renderSiteOptionArt(opt,index)}</div><span class="choice-title">${opt.name}</span><span class="choice-sub">${opt.meta}</span></button>`).join("")}</div>`;document.querySelectorAll(".site-answer-option").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".site-answer-option").forEach(x=>x.classList.remove("selected-correct","selected-wrong"));if(btn.dataset.correct==="yes"){btn.classList.add("selected-correct");correctAdvance("Correct injection site selected.",`${btn.dataset.answerName} is an appropriate ${scenario.route} site for this prescription.`)}else{btn.classList.add("selected-wrong");showBad("Not quite.",`${correctSite.name} is the best answer here. It matches the ${scenario.route} route.`)}}));return}
+if(state.mode==="sites"){modePanelEl.className="panel interaction-panel sites-mode";const correctPool=getSiteChoicesForRoute(scenario.route);const otherRoutes=["IM","SQ","ID"].filter(r=>r!==scenario.route);const wrongRouteA=pickRandom(getSiteChoicesForRoute(otherRoutes[0]));const wrongRouteB=pickRandom(getSiteChoicesForRoute(otherRoutes[1]));const correctSite=pickRandom(correctPool);const distractors=[wrongRouteA,wrongRouteB,pickRandom(nonInjectionSites)];const options=shuffleArray([{kind:"route-site",route:scenario.route,name:correctSite.name,meta:correctSite.meta,correct:true,image:correctSite.image},{kind:"route-site",route:otherRoutes[0],name:distractors[0].name,meta:distractors[0].meta,correct:false,image:distractors[0].image},{kind:"route-site",route:otherRoutes[1],name:distractors[1].name,meta:distractors[1].meta,correct:false,image:distractors[1].image},{kind:"non-site",route:"NONE",name:distractors[2].name,meta:distractors[2].meta,correct:false,image:distractors[2].image}]);modePanelEl.innerHTML=`<h3 class="section-title">Choose the correct injection site</h3><div class="mini-card site-prompt-card" style="margin-bottom:14px;"><div class="route-icon ${scenario.route.toLowerCase()}">${guide.icon}</div><span class="mini-title">Prompt</span><p>Choose the best injection site for this prescription. Only one answer is appropriate.</p></div><div class="choice-grid two site-answer-grid">${options.map((opt)=>`<button class="choice-btn site-answer-option" data-correct="${opt.correct?"yes":"no"}" data-answer-name="${escapeHtml(opt.name)}" data-answer-route="${opt.route}"><div class="site-answer-art">${renderSiteOptionArt(opt)}</div><span class="choice-title">${opt.name}</span><span class="choice-sub">${opt.meta}</span></button>`).join("")}</div>`;document.querySelectorAll(".site-answer-option").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".site-answer-option").forEach(x=>x.classList.remove("selected-correct","selected-wrong"));if(btn.dataset.correct==="yes"){btn.classList.add("selected-correct");correctAdvance("Correct injection site selected.",`${btn.dataset.answerName} is an appropriate ${scenario.route} site for this prescription.`)}else{btn.classList.add("selected-wrong");showBad("Not quite.",`${correctSite.name} is the best answer here. It matches the ${scenario.route} route.`)}}));return}
 modePanelEl.className="panel interaction-panel";const safetyOptions=shuffleArray(scenario.safetyOptions);modePanelEl.innerHTML=`<h3 class="section-title">Safety Check</h3><div class="mini-card" style="margin-bottom:14px;"><div class="route-icon ${scenario.route.toLowerCase()}">${guide.icon}</div><span class="mini-title">Scenario</span><p>${scenario.safetyPrompt}</p></div><div class="choice-grid two">${safetyOptions.map(opt=>`<button class="choice-btn safety-option" data-answer="${escapeHtml(opt)}"><span class="choice-title">${opt}</span></button>`).join("")}</div>`;document.querySelectorAll(".safety-option").forEach(btn=>btn.addEventListener("click",()=>{const answer=btn.dataset.answer;if(answer===scenario.safetyAnswer){btn.classList.add("selected-correct");correctAdvance("Correct safety issue identified.",`${scenario.safetyAnswer} is the best answer. ${scenario.explainCorrect}`)}else{btn.classList.add("selected-wrong");showBad(`Not quite. Correct answer: ${scenario.safetyAnswer}`,`This scenario is mainly about ${scenario.safetyAnswer.toLowerCase()}.`)}}))
 }
 
+const siteChoiceLibrary={
+  IM:[
+    {name:"Deltoid",meta:"Upper arm muscle",image:"assets/sites/deltoid.png"},
+    {name:"Ventrogluteal",meta:"Hip area",image:"assets/sites/ventrogluteal.png"},
+    {name:"Vastus Lateralis",meta:"Outer thigh muscle",image:"assets/sites/vastus_lateralis.png"},
+    {name:"Dorsogluteal",meta:"Upper outer buttock",image:"assets/sites/dorsogluteal.png"}
+  ],
+  SQ:[
+    {name:"Lower Abdomen",meta:"2 inches from navel",image:"assets/sites/abdomen.png"},
+    {name:"Back of Upper Arm",meta:"Fat tissue area",image:"assets/sites/upper_arm_back.png"},
+    {name:"Top of Thigh",meta:"Fat tissue area",image:"assets/sites/thigh_sq.png"}
+  ],
+  ID:[
+    {name:"Forearm",meta:"Most common for PPD",image:"assets/sites/forearm.png"},
+    {name:"Upper Back",meta:"Between shoulder blades",image:"assets/sites/upper_back.png"}
+  ]
+};
 const nonInjectionSites=[
-  {name:"Earlobe",meta:"Not used for routine medication injections"},
-  {name:"Palm of hand",meta:"Not an injection administration site"},
-  {name:"Heel of foot",meta:"Incorrect for these injections"},
-  {name:"Center of forehead",meta:"Not a medication injection site"}
+  {name:"Earlobe",meta:"Anatomical distractor",image:"assets/sites/earlobe.png"},
+  {name:"Toes",meta:"Anatomical distractor",image:"assets/sites/toes.png"},
+  {name:"Nose",meta:"Anatomical distractor",image:"assets/sites/nose.png"}
 ];
+function getSiteChoicesForRoute(route){return siteChoiceLibrary[route]||[]}
 function pickRandom(arr){return arr[Math.floor(Math.random()*arr.length)]}
-function renderSiteOptionArt(option,index){
-  const palette=option.route==="IM"?"im":option.route==="SQ"?"sq":option.route==="ID"?"id":"none";
-  const site=siteIllustrationData(option.name);
-  return `<svg class="site-option-svg ${palette}" viewBox="0 0 220 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <defs>
-      <linearGradient id="siteBg-${index}" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#fbfbfc"/><stop offset="100%" stop-color="#f2f5f8"/></linearGradient>
-      <linearGradient id="skin-${index}" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#efd7c8"/><stop offset="100%" stop-color="#e5c2ae"/></linearGradient>
-      <linearGradient id="muscle-${index}" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#f7eee8"/><stop offset="100%" stop-color="#ecd4c6"/></linearGradient>
-    </defs>
-    <rect x="6" y="6" width="208" height="108" rx="22" fill="url(#siteBg-${index})" stroke="#d8dfe5"/>
-    <text x="18" y="24" class="site-view-label">${site.view}</text>
-    ${renderSiteScene(site,index)}
-  </svg>`;
-}
-function siteIllustrationData(name){
-  const n=name.toLowerCase();
-  if(n.includes("deltoid"))return{key:"deltoid",view:"Arm view",marker:"#f4c542"};
-  if(n.includes("upper arm"))return{key:"upper-arm",view:"Arm view",marker:"#f4c542"};
-  if(n.includes("forearm"))return{key:"forearm",view:"Forearm view",marker:"#7c94c7"};
-  if(n.includes("abdomen"))return{key:"abdomen",view:"Front view",marker:"#f26c4f"};
-  if(n.includes("chest"))return{key:"chest",view:"Front view",marker:"#7c94c7"};
-  if(n.includes("upper back"))return{key:"upper-back",view:"Back view",marker:"#7c94c7"};
-  if(n.includes("ventrogluteal")||n.includes("hip"))return{key:"hip",view:"Hip view",marker:"#f4c542"};
-  if(n.includes("vastus")||n.includes("thigh"))return{key:"thigh",view:"Thigh view",marker:"#f4c542"};
-  return{key:"nonsite",view:"Not a site",marker:"#9aa7b3"};
-}
-function renderSiteScene(site,index){
-  if(site.key==="deltoid"||site.key==="upper-arm")return `<g>
-    <rect x="62" y="30" width="96" height="56" rx="26" fill="url(#muscle-${index})" stroke="#d3b1a0" stroke-width="1.6"/>
-    <path d="M82 42 C72 48, 68 58, 70 70" fill="none" stroke="#d3b1a0" stroke-width="1.6" stroke-linecap="round"/>
-    <path d="M138 42 C146 48, 150 58, 148 70" fill="none" stroke="#d3b1a0" stroke-width="1.6" stroke-linecap="round"/>
-    <rect x="44" y="40" width="28" height="36" rx="14" fill="url(#skin-${index})" stroke="#d3b1a0" stroke-width="1.6"/>
-    <rect x="148" y="40" width="28" height="36" rx="14" fill="url(#skin-${index})" stroke="#d3b1a0" stroke-width="1.6"/>
-    <circle cx="62" cy="56" r="6.5" fill="${site.marker}" stroke="#ffffff" stroke-width="2.5"/>
-  </g>`;
-  if(site.key==="forearm")return `<g>
-    <rect x="44" y="46" width="132" height="28" rx="14" fill="url(#skin-${index})" stroke="#d3b1a0" stroke-width="1.6" transform="rotate(-12 110 60)"/>
-    <path d="M72 50 L156 72" stroke="#f7fafc" stroke-width="4" stroke-linecap="round" opacity=".7"/>
-    <path d="M84 47 L168 69" stroke="#f0c6b6" stroke-width="2.4" stroke-linecap="round" opacity=".7"/>
-    <circle cx="94" cy="60" r="6.5" fill="${site.marker}" stroke="#ffffff" stroke-width="2.5"/>
-  </g>`;
-  if(site.key==="abdomen")return `<g>
-    <path d="M82 24 C94 16, 126 16, 138 24" fill="none" stroke="#d7c0b2" stroke-width="2" stroke-linecap="round"/>
-    <rect x="72" y="28" width="76" height="64" rx="26" fill="url(#skin-${index})" stroke="#d3b1a0" stroke-width="1.7"/>
-    <path d="M110 36 L110 84" stroke="#e7c6b6" stroke-width="1.4" opacity=".75"/>
-    <circle cx="110" cy="62" r="4.2" fill="#d6b3a2" opacity=".9"/>
-    <circle cx="128" cy="62" r="6.5" fill="${site.marker}" stroke="#ffffff" stroke-width="2.5"/>
-  </g>`;
-  if(site.key==="chest")return `<g>
-    <rect x="76" y="28" width="68" height="60" rx="24" fill="url(#skin-${index})" stroke="#d3b1a0" stroke-width="1.7"/>
-    <path d="M110 28 L110 88" stroke="#e7c6b6" stroke-width="1.4" opacity=".75"/>
-    <path d="M80 46 C94 38, 126 38, 140 46" fill="none" stroke="#ddb6a3" stroke-width="1.3" opacity=".65"/>
-    <circle cx="92" cy="56" r="6.5" fill="${site.marker}" stroke="#ffffff" stroke-width="2.5"/>
-  </g>`;
-  if(site.key==="upper-back")return `<g>
-    <rect x="76" y="24" width="68" height="68" rx="24" fill="url(#skin-${index})" stroke="#d3b1a0" stroke-width="1.7"/>
-    <path d="M110 30 L110 88" stroke="#d8b3a1" stroke-width="2" opacity=".8"/>
-    <path d="M88 44 C92 56, 92 68, 88 78" fill="none" stroke="#e6c8ba" stroke-width="5" stroke-linecap="round"/>
-    <path d="M132 44 C128 56, 128 68, 132 78" fill="none" stroke="#e6c8ba" stroke-width="5" stroke-linecap="round"/>
-    <circle cx="110" cy="54" r="6.5" fill="${site.marker}" stroke="#ffffff" stroke-width="2.5"/>
-  </g>`;
-  if(site.key==="hip")return `<g>
-    <path d="M88 28 C92 18, 128 18, 132 28" fill="none" stroke="#d7c0b2" stroke-width="2" stroke-linecap="round"/>
-    <rect x="72" y="34" width="76" height="34" rx="18" fill="url(#skin-${index})" stroke="#d3b1a0" stroke-width="1.7"/>
-    <rect x="80" y="66" width="24" height="28" rx="12" fill="url(#skin-${index})" stroke="#d3b1a0" stroke-width="1.5"/>
-    <rect x="116" y="66" width="24" height="28" rx="12" fill="url(#skin-${index})" stroke="#d3b1a0" stroke-width="1.5"/>
-    <circle cx="90" cy="64" r="6.5" fill="${site.marker}" stroke="#ffffff" stroke-width="2.5"/>
-  </g>`;
-  if(site.key==="thigh")return `<g>
-    <rect x="74" y="18" width="72" height="24" rx="12" fill="url(#skin-${index})" stroke="#d3b1a0" stroke-width="1.5"/>
-    <rect x="80" y="40" width="24" height="56" rx="12" fill="url(#skin-${index})" stroke="#d3b1a0" stroke-width="1.5"/>
-    <rect x="116" y="40" width="24" height="56" rx="12" fill="url(#skin-${index})" stroke="#d3b1a0" stroke-width="1.5"/>
-    <path d="M92 46 L92 90" stroke="#efceb8" stroke-width="1.4" opacity=".75"/>
-    <circle cx="92" cy="68" r="6.5" fill="${site.marker}" stroke="#ffffff" stroke-width="2.5"/>
-  </g>`;
-  return `<g>
-    <circle cx="78" cy="62" r="20" fill="url(#skin-${index})" stroke="#d3b1a0" stroke-width="1.5"/>
-    <rect x="126" y="38" width="34" height="46" rx="10" fill="#edf1f4" stroke="#c3ccd3" stroke-width="1.5"/>
-    <line x1="46" y1="88" x2="176" y2="28" stroke="#d78b7d" stroke-width="6" stroke-linecap="round" opacity=".8"/>
-    <circle cx="143" cy="60" r="7" fill="${site.marker}" stroke="#ffffff" stroke-width="2.5"/>
-  </g>`;
+function renderSiteOptionArt(option){
+  const safeName=escapeHtml(option.name);
+  const safeMeta=escapeHtml(option.meta||"");
+  const safeImage=escapeHtml(option.image||"");
+  return `<img class="site-option-image" src="${safeImage}" alt="${safeName} - ${safeMeta}" loading="lazy" />`;
 }
 function syringeDisplayName(id){if(id==="3ml")return"3 mL Syringe";if(id==="tuberculin")return"1 mL TB Syringe";if(id==="insulin")return"Unit Syringe";return id}
 function syringeCard(item){return`<button class="choice-btn syringe-option" data-syringe-id="${item.id}"><div class="syringe-graphic">${renderSyringeSVG(item)}</div><span class="choice-title">${syringeDisplayName(item.id)}</span></button>`}
